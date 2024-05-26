@@ -1,0 +1,26 @@
+apiVersion: jaegertracing.io/v1
+kind: Jaeger
+metadata:
+  name: jaeger-cluster
+  namespace: observe
+spec:
+  strategy: production # This is the strategy for deployment
+  collector:
+    maxReplicas: 5 # Set a value for MaxReplicas (for HPA)
+    resources:
+      limits:
+        cpu: 100m
+        memory: 128Mi
+  storage:
+    type: elasticsearch
+    options:
+      es:
+        # Service Discovery URL for Opensearch
+        server-urls: https://opensearch-cluster-master.observe.svc.cluster.local:9200
+        # Indices will be created like demo-jaeger-span-2024-05-26
+        index-prefix: demo
+        tls.enabled: true
+        # We are enabling this because we are using demo-config
+        tls.skip-host-verify: true
+        username: admin
+        password: Sl4Ij+H@\k4}0Vn

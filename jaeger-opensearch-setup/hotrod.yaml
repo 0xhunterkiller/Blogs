@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: example-hotrod
+  labels:
+    app: hotrod
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hotrod
+  template:
+    metadata:
+      labels:
+        app: hotrod
+    spec:
+      containers:
+      - name: hotrod
+        image: jaegertracing/example-hotrod:latest
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+        - containerPort: 8081
+          protocol: TCP
+        - containerPort: 8082
+          protocol: TCP
+        - containerPort: 8083
+          protocol: TCP
+        env:
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          value: "http://jaeger-cluster-collector.observe.svc.cluster.local:4318"
+        resources:
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+          requests:
+            memory: "128Mi"
+            cpu: "250m"
+        args: ["all"]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hotrod-service
+  labels:
+    app: hotrod
+spec:
+  ports:
+  - port: 8080
+    targetPort: 8080
+    name: port8080
+  - port: 8081
+    targetPort: 8081
+    name: port8081
+  - port: 8082
+    targetPort: 8082
+    name: port8082
+  - port: 8083
+    targetPort: 8083
+    name: port8083
+  selector:
+    app: hotrod
+  type: ClusterIP
